@@ -5,7 +5,7 @@ var container map[string]interface{}
 
 // Init container
 func init() {
-	container = make(map[string]interface{})
+	Reset()
 }
 
 // Resolving dependency by resource name
@@ -45,6 +45,11 @@ func Alias(alias string, originName string) {
 	if resource != nil {
 		container[alias] = resource
 	}
+}
+
+// Reset container
+func Reset()  {
+	container = make(map[string]interface{})
 }
 
 // Fetching resource by name

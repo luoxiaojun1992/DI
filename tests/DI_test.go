@@ -1,9 +1,9 @@
 package tests
 
 import (
-	"testing"
 	"github.com/luoxiaojun1992/DI"
 	"log"
+	"testing"
 )
 
 func Test_SingletonResolve(t *testing.T) {
@@ -16,7 +16,7 @@ func Test_SingletonResolve(t *testing.T) {
 		t.Fatal("UserService not found")
 	}
 
-	val, ok := userService.(struct{name string})
+	val, ok := userService.(struct{ name string })
 	if !ok {
 		t.Fatal("UserService type error")
 	}
@@ -38,7 +38,7 @@ func Test_InstanceResolve(t *testing.T) {
 		t.Fatal("UserService not found")
 	}
 
-	val, ok := userService.(struct{name string})
+	val, ok := userService.(struct{ name string })
 	if !ok {
 		t.Fatal("UserService type error")
 	}
@@ -59,7 +59,7 @@ func Test_AliasSingletonResolve(t *testing.T) {
 		t.Fatal("UserService not found")
 	}
 
-	val, ok := userService.(struct{name string})
+	val, ok := userService.(struct{ name string })
 	if !ok {
 		t.Fatal("UserService type error")
 	}
@@ -82,7 +82,7 @@ func Test_AliasInstanceResolve(t *testing.T) {
 		t.Fatal("UserService not found")
 	}
 
-	val, ok := userService.(struct{name string})
+	val, ok := userService.(struct{ name string })
 	if !ok {
 		t.Fatal("UserService type error")
 	}
@@ -111,7 +111,7 @@ func Test_ResolveGroup(t *testing.T) {
 		t.Fatal("UserService not found")
 	}
 
-	user, ok := services[0].(struct{name string})
+	user, ok := services[0].(struct{ name string })
 	if !ok {
 		t.Fatal("UserService type error")
 	}
@@ -124,7 +124,7 @@ func Test_ResolveGroup(t *testing.T) {
 		t.Fatal("GoodsService not found")
 	}
 
-	goods, ok := services[1].(struct{name string})
+	goods, ok := services[1].(struct{ name string })
 	if !ok {
 		t.Fatal("GoodsService type error")
 	}
@@ -137,7 +137,7 @@ func Test_ResolveGroup(t *testing.T) {
 		t.Fatal("OrderService not found")
 	}
 
-	order, ok := services[2].(struct{name string})
+	order, ok := services[2].(struct{ name string })
 	if !ok {
 		t.Fatal("OrderService type error")
 	}
@@ -147,14 +147,44 @@ func Test_ResolveGroup(t *testing.T) {
 	}
 }
 
+func Test_TagResolve(t *testing.T) {
+	DI.Singleton("UserService", struct {
+		name string
+	}{name: "hello"})
+
+	DI.Tag("TagDemo", &struct {
+		Name interface{} `dep:"UserService"`
+	}{Name: "test"})
+
+	tagDemo := DI.Resolve("TagDemo")
+	if tagDemo == nil {
+		t.Fatal("TagDemo not found")
+	}
+
+	val, ok := tagDemo.(*struct {
+		Name interface{} `dep:"UserService"`
+	})
+	if !ok {
+		t.Fatal("TagDemo type error")
+	}
+
+	userService, ok := val.Name.(struct{ name string })
+	if !ok {
+		t.Fatal("UserService type error")
+	}
+	if userService.name != "hello" {
+		t.Fatal("User name is incorrect")
+	}
+}
+
 func Benchmark_SingletonResolve(b *testing.B) {
 	DI.Singleton("UserService", struct {
 		name string
 	}{name: "hello"})
 
 	i := 0
-	for ;i <= b.N;i++ {
-		if DI.Resolve("UserService").(struct{name string}).name != "hello" {
+	for ; i <= b.N; i++ {
+		if DI.Resolve("UserService").(struct{ name string }).name != "hello" {
 			log.Fatal("User name is incorrect")
 		}
 	}
@@ -168,8 +198,8 @@ func Benchmark_InstanceResolve(b *testing.B) {
 	})
 
 	i := 0
-	for ;i <= b.N;i++ {
-		if DI.Resolve("UserService").(struct{name string}).name != "hello" {
+	for ; i <= b.N; i++ {
+		if DI.Resolve("UserService").(struct{ name string }).name != "hello" {
 			log.Fatal("User name is incorrect")
 		}
 	}
@@ -182,8 +212,8 @@ func Benchmark_AliasSingletonResolve(b *testing.B) {
 	DI.Alias("UserServ", "UserService")
 
 	i := 0
-	for ;i <= b.N;i++ {
-		if DI.Resolve("UserServ").(struct{name string}).name != "hello" {
+	for ; i <= b.N; i++ {
+		if DI.Resolve("UserServ").(struct{ name string }).name != "hello" {
 			log.Fatal("User name is incorrect")
 		}
 	}
@@ -198,8 +228,8 @@ func Benchmark_AliasInstanceResolve(b *testing.B) {
 	DI.Alias("UserServ", "UserService")
 
 	i := 0
-	for ;i <= b.N;i++ {
-		if DI.Resolve("UserServ").(struct{name string}).name != "hello" {
+	for ; i <= b.N; i++ {
+		if DI.Resolve("UserServ").(struct{ name string }).name != "hello" {
 			log.Fatal("User name is incorrect")
 		}
 	}
@@ -218,21 +248,40 @@ func Benchmark_ResolveGroup(b *testing.B) {
 		name string
 	}{name: "new order"})
 
-
 	i := 0
-	for ;i <= b.N;i++ {
+	for ; i <= b.N; i++ {
 		services := DI.ResolveGroup([]string{"UserService", "GoodsService", "OrderService"})
 
-		if services[0].(struct{name string}).name != "new user" {
+		if services[0].(struct{ name string }).name != "new user" {
 			log.Fatal("User name is incorrect")
 		}
 
-		if services[1].(struct{name string}).name != "new goods" {
+		if services[1].(struct{ name string }).name != "new goods" {
 			log.Fatal("Goods name is incorrect")
 		}
 
-		if services[2].(struct{name string}).name != "new order" {
+		if services[2].(struct{ name string }).name != "new order" {
 			log.Fatal("Order name is incorrect")
+		}
+	}
+}
+
+func Benchmark_TagResolve(b *testing.B) {
+	DI.Singleton("UserService", struct {
+		name string
+	}{name: "hello"})
+
+	DI.Tag("TagDemo", &struct {
+		Name interface{} `dep:"UserService"`
+	}{Name: "test"})
+
+	i := 0
+	for ; i <= b.N; i++ {
+		tagDemo := DI.Resolve("TagDemo")
+		if tagDemo.(*struct {
+			Name interface{} `dep:"UserService"`
+		}).Name.(struct{ name string }).name != "hello" {
+			log.Fatal("User name is incorrect")
 		}
 	}
 }

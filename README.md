@@ -5,8 +5,10 @@ Dependency Injection in Go
 * Singleton Register
 * Instance Register
 * Alias Register
+* Tag Register
 * Resolve Single Dependency
 * Resolve Grouped Dependency
+* Resolve Tag Dependency
 
 # Test Result
 ![](docs/test_result.png)
@@ -30,6 +32,12 @@ DI.Resolve("UserService")
 //Alias Register
 DI.Alias("UserServ", "UserService")
 DI.Resolve("UserServ")
+
+//Tag Register
+DI.Tag("TagDemo", &struct {
+		Name interface{} `dep:"UserService"`
+	}{Name: "test"})
+DI.Resolve("TagDemo")
 
 //Resolve Grouped Dependency
 DI.Singleton("UserService", struct {

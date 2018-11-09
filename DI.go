@@ -1,5 +1,9 @@
 package DI
 
+import (
+	"reflect"
+)
+
 // Dependency Container
 var container map[string]interface{}
 
@@ -45,6 +49,21 @@ func Alias(alias string, originName string) {
 	if resource != nil {
 		container[alias] = resource
 	}
+}
+
+// Inject singleton resource with tags
+func Tag(name string, resource interface{}) {
+	// Reference
+	reflectType := reflect.TypeOf(resource).Elem()
+	reflectValue := reflect.ValueOf(resource).Elem()
+
+	i := 0
+	for ;i < reflectType.NumField();i++ {
+		depName := reflectType.Field(i).Tag.Get("dep")
+		reflectValue.Field(i).Set(reflect.ValueOf(Resolve(depName)))
+	}
+
+	Singleton(name, resource)
 }
 
 // Reset container

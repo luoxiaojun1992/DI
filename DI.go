@@ -4,17 +4,22 @@ import (
 	"reflect"
 )
 
-// Dependency Container
-var container map[string]interface{}
+type Container struct {
+	// Dependency Container
+	container map[string]interface{}
+}
+
+var C *Container
 
 // Init container
 func init() {
-	Reset()
+	C = &Container{container:make(map[string]interface{})}
+	C.Reset()
 }
 
 // Resolving dependency by resource name
-func Resolve(name string) interface{} {
-	resource := fetchResource(name)
+func (c *Container) Resolve(name string) interface{} {
+	resource := c.fetchResource(name)
 	if resource != nil {
 		return resource.(func() interface{})()
 	}
@@ -23,36 +28,36 @@ func Resolve(name string) interface{} {
 }
 
 // Resolving dependency group by resource names
-func ResolveGroup(names []string) []interface{} {
+func (c *Container) ResolveGroup(names []string) []interface{} {
 	resources := make([]interface{}, 0, len(names))
 
 	for _, name := range names {
-		resources = append(resources, Resolve(name))
+		resources = append(resources, c.Resolve(name))
 	}
 
 	return resources
 }
 
 // Injecting singleton resource
-func Singleton(name string, resource interface{}) {
-	Instance(name, func() interface{} { return resource })
+func (c *Container) Singleton(name string, resource interface{}) {
+	c.Instance(name, func() interface{} { return resource })
 }
 
 // Injecting instance resource
-func Instance(name string, factory func() interface{}) {
-	container[name] = factory
+func (c *Container) Instance(name string, factory func() interface{}) {
+	c.container[name] = factory
 }
 
 // Injecting resource alias
-func Alias(alias string, originName string) {
-	resource := fetchResource(originName)
+func (c *Container) Alias(alias string, originName string) {
+	resource := c.fetchResource(originName)
 	if resource != nil {
-		container[alias] = resource
+		c.container[alias] = resource
 	}
 }
 
 // Inject singleton resource with tags
-func Tag(name string, resource interface{}) {
+func (c *Container) Tag(name string, resource interface{}) {
 	// Reference
 	reflectType := reflect.TypeOf(resource).Elem()
 	reflectValue := reflect.ValueOf(resource).Elem()
@@ -60,20 +65,20 @@ func Tag(name string, resource interface{}) {
 	i := 0
 	for ; i < reflectType.NumField(); i++ {
 		depName := reflectType.Field(i).Tag.Get("dep")
-		reflectValue.Field(i).Set(reflect.ValueOf(Resolve(depName)))
+		reflectValue.Field(i).Set(reflect.ValueOf(c.Resolve(depName)))
 	}
 
-	Singleton(name, resource)
+	c.Singleton(name, resource)
 }
 
 // Reset container
-func Reset() {
-	container = make(map[string]interface{})
+func (c *Container) Reset() {
+	c.container = make(map[string]interface{})
 }
 
 // Fetching resource by name
-func fetchResource(name string) interface{} {
-	if resource, ok := container[name]; ok {
+func (c *Container) fetchResource(name string) interface{} {
+	if resource, ok := c.container[name]; ok {
 		return resource
 	}
 

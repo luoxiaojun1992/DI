@@ -15,39 +15,41 @@ Dependency Injection in Go
 
 # Examples
 ```go
+var container = DI.C
+
 //Singleton Register
-DI.Singleton("UserService", struct {
+container.Singleton("UserService", struct {
 		name string
 	}{name: "hello"})
-DI.Resolve("UserService")
+container.Resolve("UserService")
 
 //Instance Register
-DI.Instance("UserService", func() interface{} {
+container.Instance("UserService", func() interface{} {
 		return struct {
 			name string
 		}{name: "hello"}
 	})
-DI.Resolve("UserService")
+container.Resolve("UserService")
 	
 //Alias Register
-DI.Alias("UserServ", "UserService")
-DI.Resolve("UserServ")
+container.Alias("UserServ", "UserService")
+container.Resolve("UserServ")
 
 //Tag Register
-DI.Tag("TagDemo", &struct {
+container.Tag("TagDemo", &struct {
 		Name interface{} `dep:"UserService"`
 	}{Name: "test"})
-DI.Resolve("TagDemo")
+container.Resolve("TagDemo")
 
 //Resolve Grouped Dependency
-DI.Singleton("UserService", struct {
+container.Singleton("UserService", struct {
 		name string
 	}{name: "new user"})
-DI.Singleton("GoodsService", struct {
+container.Singleton("GoodsService", struct {
 		name string
 	}{name: "new goods"})
-DI.Singleton("OrderService", struct {
+container.Singleton("OrderService", struct {
 		name string
 	}{name: "new order"})
-DI.ResolveGroup([]string{"UserService", "GoodsService", "OrderService"})
+container.ResolveGroup([]string{"UserService", "GoodsService", "OrderService"})
 ```

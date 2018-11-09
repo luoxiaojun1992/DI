@@ -6,12 +6,14 @@ import (
 	"testing"
 )
 
+var container = DI.C
+
 func Test_SingletonResolve(t *testing.T) {
-	DI.Singleton("UserService", struct {
+	container.Singleton("UserService", struct {
 		name string
 	}{name: "hello"})
 
-	userService := DI.Resolve("UserService")
+	userService := container.Resolve("UserService")
 	if userService == nil {
 		t.Fatal("UserService not found")
 	}
@@ -27,13 +29,13 @@ func Test_SingletonResolve(t *testing.T) {
 }
 
 func Test_InstanceResolve(t *testing.T) {
-	DI.Instance("UserService", func() interface{} {
+	container.Instance("UserService", func() interface{} {
 		return struct {
 			name string
 		}{name: "hello"}
 	})
 
-	userService := DI.Resolve("UserService")
+	userService := container.Resolve("UserService")
 	if userService == nil {
 		t.Fatal("UserService not found")
 	}
@@ -49,12 +51,12 @@ func Test_InstanceResolve(t *testing.T) {
 }
 
 func Test_AliasSingletonResolve(t *testing.T) {
-	DI.Singleton("UserService", struct {
+	container.Singleton("UserService", struct {
 		name string
 	}{name: "hello"})
-	DI.Alias("UserServ", "UserService")
+	container.Alias("UserServ", "UserService")
 
-	userService := DI.Resolve("UserServ")
+	userService := container.Resolve("UserServ")
 	if userService == nil {
 		t.Fatal("UserService not found")
 	}
@@ -70,14 +72,14 @@ func Test_AliasSingletonResolve(t *testing.T) {
 }
 
 func Test_AliasInstanceResolve(t *testing.T) {
-	DI.Instance("UserService", func() interface{} {
+	container.Instance("UserService", func() interface{} {
 		return struct {
 			name string
 		}{name: "hello"}
 	})
-	DI.Alias("UserServ", "UserService")
+	container.Alias("UserServ", "UserService")
 
-	userService := DI.Resolve("UserServ")
+	userService := container.Resolve("UserServ")
 	if userService == nil {
 		t.Fatal("UserService not found")
 	}
@@ -93,19 +95,19 @@ func Test_AliasInstanceResolve(t *testing.T) {
 }
 
 func Test_ResolveGroup(t *testing.T) {
-	DI.Singleton("UserService", struct {
+	container.Singleton("UserService", struct {
 		name string
 	}{name: "new user"})
 
-	DI.Singleton("GoodsService", struct {
+	container.Singleton("GoodsService", struct {
 		name string
 	}{name: "new goods"})
 
-	DI.Singleton("OrderService", struct {
+	container.Singleton("OrderService", struct {
 		name string
 	}{name: "new order"})
 
-	services := DI.ResolveGroup([]string{"UserService", "GoodsService", "OrderService"})
+	services := container.ResolveGroup([]string{"UserService", "GoodsService", "OrderService"})
 
 	if services[0] == nil {
 		t.Fatal("UserService not found")
@@ -148,15 +150,15 @@ func Test_ResolveGroup(t *testing.T) {
 }
 
 func Test_TagResolve(t *testing.T) {
-	DI.Singleton("UserService", struct {
+	container.Singleton("UserService", struct {
 		name string
 	}{name: "hello"})
 
-	DI.Tag("TagDemo", &struct {
+	container.Tag("TagDemo", &struct {
 		Name interface{} `dep:"UserService"`
 	}{Name: "test"})
 
-	tagDemo := DI.Resolve("TagDemo")
+	tagDemo := container.Resolve("TagDemo")
 	if tagDemo == nil {
 		t.Fatal("TagDemo not found")
 	}
@@ -178,20 +180,20 @@ func Test_TagResolve(t *testing.T) {
 }
 
 func Benchmark_SingletonResolve(b *testing.B) {
-	DI.Singleton("UserService", struct {
+	container.Singleton("UserService", struct {
 		name string
 	}{name: "hello"})
 
 	i := 0
 	for ; i <= b.N; i++ {
-		if DI.Resolve("UserService").(struct{ name string }).name != "hello" {
+		if container.Resolve("UserService").(struct{ name string }).name != "hello" {
 			log.Fatal("User name is incorrect")
 		}
 	}
 }
 
 func Benchmark_InstanceResolve(b *testing.B) {
-	DI.Instance("UserService", func() interface{} {
+	container.Instance("UserService", func() interface{} {
 		return struct {
 			name string
 		}{name: "hello"}
@@ -199,58 +201,58 @@ func Benchmark_InstanceResolve(b *testing.B) {
 
 	i := 0
 	for ; i <= b.N; i++ {
-		if DI.Resolve("UserService").(struct{ name string }).name != "hello" {
+		if container.Resolve("UserService").(struct{ name string }).name != "hello" {
 			log.Fatal("User name is incorrect")
 		}
 	}
 }
 
 func Benchmark_AliasSingletonResolve(b *testing.B) {
-	DI.Singleton("UserService", struct {
+	container.Singleton("UserService", struct {
 		name string
 	}{name: "hello"})
-	DI.Alias("UserServ", "UserService")
+	container.Alias("UserServ", "UserService")
 
 	i := 0
 	for ; i <= b.N; i++ {
-		if DI.Resolve("UserServ").(struct{ name string }).name != "hello" {
+		if container.Resolve("UserServ").(struct{ name string }).name != "hello" {
 			log.Fatal("User name is incorrect")
 		}
 	}
 }
 
 func Benchmark_AliasInstanceResolve(b *testing.B) {
-	DI.Instance("UserService", func() interface{} {
+	container.Instance("UserService", func() interface{} {
 		return struct {
 			name string
 		}{name: "hello"}
 	})
-	DI.Alias("UserServ", "UserService")
+	container.Alias("UserServ", "UserService")
 
 	i := 0
 	for ; i <= b.N; i++ {
-		if DI.Resolve("UserServ").(struct{ name string }).name != "hello" {
+		if container.Resolve("UserServ").(struct{ name string }).name != "hello" {
 			log.Fatal("User name is incorrect")
 		}
 	}
 }
 
 func Benchmark_ResolveGroup(b *testing.B) {
-	DI.Singleton("UserService", struct {
+	container.Singleton("UserService", struct {
 		name string
 	}{name: "new user"})
 
-	DI.Singleton("GoodsService", struct {
+	container.Singleton("GoodsService", struct {
 		name string
 	}{name: "new goods"})
 
-	DI.Singleton("OrderService", struct {
+	container.Singleton("OrderService", struct {
 		name string
 	}{name: "new order"})
 
 	i := 0
 	for ; i <= b.N; i++ {
-		services := DI.ResolveGroup([]string{"UserService", "GoodsService", "OrderService"})
+		services := container.ResolveGroup([]string{"UserService", "GoodsService", "OrderService"})
 
 		if services[0].(struct{ name string }).name != "new user" {
 			log.Fatal("User name is incorrect")
@@ -267,17 +269,17 @@ func Benchmark_ResolveGroup(b *testing.B) {
 }
 
 func Benchmark_TagResolve(b *testing.B) {
-	DI.Singleton("UserService", struct {
+	container.Singleton("UserService", struct {
 		name string
 	}{name: "hello"})
 
-	DI.Tag("TagDemo", &struct {
+	container.Tag("TagDemo", &struct {
 		Name interface{} `dep:"UserService"`
 	}{Name: "test"})
 
 	i := 0
 	for ; i <= b.N; i++ {
-		tagDemo := DI.Resolve("TagDemo")
+		tagDemo := container.Resolve("TagDemo")
 		if tagDemo.(*struct {
 			Name interface{} `dep:"UserService"`
 		}).Name.(struct{ name string }).name != "hello" {

@@ -13,7 +13,7 @@ var C *Container
 
 // Init container
 func init() {
-	C = &Container{container:make(map[string]interface{})}
+	C = &Container{container: make(map[string]interface{})}
 	C.Reset()
 }
 

@@ -35,7 +35,7 @@ func ResolveGroup(names []string) []interface{} {
 
 // Injecting singleton resource
 func Singleton(name string, resource interface{}) {
-	Instance(name, func() interface{} {return resource})
+	Instance(name, func() interface{} { return resource })
 }
 
 // Injecting instance resource
@@ -58,7 +58,7 @@ func Tag(name string, resource interface{}) {
 	reflectValue := reflect.ValueOf(resource).Elem()
 
 	i := 0
-	for ;i < reflectType.NumField();i++ {
+	for ; i < reflectType.NumField(); i++ {
 		depName := reflectType.Field(i).Tag.Get("dep")
 		reflectValue.Field(i).Set(reflect.ValueOf(Resolve(depName)))
 	}
@@ -67,7 +67,7 @@ func Tag(name string, resource interface{}) {
 }
 
 // Reset container
-func Reset()  {
+func Reset() {
 	container = make(map[string]interface{})
 }
 

@@ -92,7 +92,62 @@ func Test_AliasInstanceResolve(t *testing.T) {
 	}
 }
 
-func Benchmark_SingletonResolve(b *testing.B)  {
+func Test_ResolveGroup(t *testing.T) {
+	DI.Singleton("UserService", struct {
+		name string
+	}{name: "new user"})
+
+	DI.Singleton("GoodsService", struct {
+		name string
+	}{name: "new goods"})
+
+	DI.Singleton("OrderService", struct {
+		name string
+	}{name: "new order"})
+
+	services := DI.ResolveGroup([]string{"UserService", "GoodsService", "OrderService"})
+
+	if services[0] == nil {
+		t.Fatal("UserService not found")
+	}
+
+	user, ok := services[0].(struct{name string})
+	if !ok {
+		t.Fatal("UserService type error")
+	}
+
+	if user.name != "new user" {
+		t.Fatal("User name is incorrect")
+	}
+
+	if services[1] == nil {
+		t.Fatal("GoodsService not found")
+	}
+
+	goods, ok := services[1].(struct{name string})
+	if !ok {
+		t.Fatal("GoodsService type error")
+	}
+
+	if goods.name != "new goods" {
+		t.Fatal("Goods name is incorrect")
+	}
+
+	if services[2] == nil {
+		t.Fatal("OrderService not found")
+	}
+
+	order, ok := services[2].(struct{name string})
+	if !ok {
+		t.Fatal("OrderService type error")
+	}
+
+	if order.name != "new order" {
+		t.Fatal("Order name is incorrect")
+	}
+}
+
+func Benchmark_SingletonResolve(b *testing.B) {
 	DI.Singleton("UserService", struct {
 		name string
 	}{name: "hello"})
@@ -105,7 +160,7 @@ func Benchmark_SingletonResolve(b *testing.B)  {
 	}
 }
 
-func Benchmark_InstanceResolve(b *testing.B)  {
+func Benchmark_InstanceResolve(b *testing.B) {
 	DI.Instance("UserService", func() interface{} {
 		return struct {
 			name string
@@ -120,7 +175,7 @@ func Benchmark_InstanceResolve(b *testing.B)  {
 	}
 }
 
-func Benchmark_AliasSingletonResolve(b *testing.B)  {
+func Benchmark_AliasSingletonResolve(b *testing.B) {
 	DI.Singleton("UserService", struct {
 		name string
 	}{name: "hello"})
@@ -134,7 +189,7 @@ func Benchmark_AliasSingletonResolve(b *testing.B)  {
 	}
 }
 
-func Benchmark_AliasInstanceResolve(b *testing.B)  {
+func Benchmark_AliasInstanceResolve(b *testing.B) {
 	DI.Instance("UserService", func() interface{} {
 		return struct {
 			name string
@@ -146,6 +201,38 @@ func Benchmark_AliasInstanceResolve(b *testing.B)  {
 	for ;i <= b.N;i++ {
 		if DI.Resolve("UserServ").(struct{name string}).name != "hello" {
 			log.Fatal("User name is incorrect")
+		}
+	}
+}
+
+func Benchmark_ResolveGroup(b *testing.B) {
+	DI.Singleton("UserService", struct {
+		name string
+	}{name: "new user"})
+
+	DI.Singleton("GoodsService", struct {
+		name string
+	}{name: "new goods"})
+
+	DI.Singleton("OrderService", struct {
+		name string
+	}{name: "new order"})
+
+
+	i := 0
+	for ;i <= b.N;i++ {
+		services := DI.ResolveGroup([]string{"UserService", "GoodsService", "OrderService"})
+
+		if services[0].(struct{name string}).name != "new user" {
+			log.Fatal("User name is incorrect")
+		}
+
+		if services[1].(struct{name string}).name != "new goods" {
+			log.Fatal("Goods name is incorrect")
+		}
+
+		if services[2].(struct{name string}).name != "new order" {
+			log.Fatal("Order name is incorrect")
 		}
 	}
 }

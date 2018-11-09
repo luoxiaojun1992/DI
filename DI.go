@@ -18,6 +18,17 @@ func Resolve(name string) interface{} {
 	return nil
 }
 
+// Resolving dependency group by resource names
+func ResolveGroup(names []string) []interface{} {
+	resources := make([]interface{}, 0, len(names))
+
+	for _, name := range names {
+		resources = append(resources, Resolve(name))
+	}
+
+	return resources
+}
+
 // Injecting singleton resource
 func Singleton(name string, resource interface{}) {
 	Instance(name, func() interface{} {return resource})

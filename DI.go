@@ -118,7 +118,7 @@ func (c *Container) CallSpec(method func(args ...interface{}) interface{}, argNa
 		}
 	}
 
-	return method(argValues ...)
+	return method(argValues...)
 }
 
 // Reset container

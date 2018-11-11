@@ -190,14 +190,14 @@ func Test_TagResolve(t *testing.T) {
 	}
 }
 
-func Test_Call(t *testing.T)  {
+func Test_Call(t *testing.T) {
 	container.Reset()
 
 	container.Singleton("UserService", struct {
 		name string
 	}{name: "hello"})
 
-	method := func(userService struct {name string}) string {return userService.name}
+	method := func(userService struct{ name string }) string { return userService.name }
 	result := container.Call(method, []string{"UserService"}, []interface{}{nil})
 
 	if result[0] != "hello" {
@@ -205,14 +205,14 @@ func Test_Call(t *testing.T)  {
 	}
 }
 
-func Test_CallSpec(t *testing.T)  {
+func Test_CallSpec(t *testing.T) {
 	container.Reset()
 
 	container.Singleton("UserService", struct {
 		name string
 	}{name: "hello"})
 
-	method := func(args ...interface{}) interface{} {return args[0].(struct{name string}).name}
+	method := func(args ...interface{}) interface{} { return args[0].(struct{ name string }).name }
 
 	if container.CallSpec(method, []string{"UserService"}, []interface{}{nil}) != "hello" {
 		t.Fatal("User name is incorrect")
@@ -366,7 +366,7 @@ func Benchmark_CallSpec(b *testing.B) {
 		name string
 	}{name: "hello"})
 
-	method := func(args ...interface{}) interface{} { return args[0].(struct{name string}).name }
+	method := func(args ...interface{}) interface{} { return args[0].(struct{ name string }).name }
 
 	i := 0
 	for ; i <= b.N; i++ {

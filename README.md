@@ -9,6 +9,7 @@ Dependency Injection in Go
 * Resolve Single Dependency
 * Resolve Grouped Dependency
 * Resolve Tag Dependency
+* Call function with args with dependencies
 
 # Test Result
 ![](docs/test_result.png)
@@ -32,10 +33,16 @@ container.Instance("UserService", func() interface{} {
 container.Resolve("UserService")
 	
 //Alias Register
+container.Singleton("UserService", struct {
+		name string
+	}{name: "hello"})
 container.Alias("UserServ", "UserService")
 container.Resolve("UserServ")
 
 //Tag Register
+container.Singleton("UserService", struct {
+		name string
+	}{name: "hello"})
 container.Tag("TagDemo", &struct {
 		Name interface{} `dep:"UserService"`
 	}{Name: "test"})
@@ -52,4 +59,11 @@ container.Singleton("OrderService", struct {
 		name string
 	}{name: "new order"})
 container.ResolveGroup([]string{"UserService", "GoodsService", "OrderService"})
+
+//Call function with args with dependencies
+container.Singleton("UserService", struct {
+		name string
+	}{name: "hello"})
+method := func(userService struct {name string}) string {return userService.name}
+container.Call(method, []string{"UserService"}, []interface{}{nil})
 ```

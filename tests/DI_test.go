@@ -2,13 +2,14 @@ package tests
 
 import (
 	"github.com/luoxiaojun1992/DI"
-	"log"
 	"testing"
 )
 
 var container = DI.C
 
 func Test_SingletonResolve(t *testing.T) {
+	container.Reset()
+
 	container.Singleton("UserService", struct {
 		name string
 	}{name: "hello"})
@@ -29,6 +30,8 @@ func Test_SingletonResolve(t *testing.T) {
 }
 
 func Test_InstanceResolve(t *testing.T) {
+	container.Reset()
+
 	container.Instance("UserService", func() interface{} {
 		return struct {
 			name string
@@ -51,6 +54,8 @@ func Test_InstanceResolve(t *testing.T) {
 }
 
 func Test_AliasSingletonResolve(t *testing.T) {
+	container.Reset()
+
 	container.Singleton("UserService", struct {
 		name string
 	}{name: "hello"})
@@ -72,6 +77,8 @@ func Test_AliasSingletonResolve(t *testing.T) {
 }
 
 func Test_AliasInstanceResolve(t *testing.T) {
+	container.Reset()
+
 	container.Instance("UserService", func() interface{} {
 		return struct {
 			name string
@@ -95,6 +102,8 @@ func Test_AliasInstanceResolve(t *testing.T) {
 }
 
 func Test_ResolveGroup(t *testing.T) {
+	container.Reset()
+
 	container.Singleton("UserService", struct {
 		name string
 	}{name: "new user"})
@@ -150,6 +159,8 @@ func Test_ResolveGroup(t *testing.T) {
 }
 
 func Test_TagResolve(t *testing.T) {
+	container.Reset()
+
 	container.Singleton("UserService", struct {
 		name string
 	}{name: "hello"})
@@ -179,7 +190,24 @@ func Test_TagResolve(t *testing.T) {
 	}
 }
 
+func Test_Call(t *testing.T)  {
+	container.Reset()
+
+	container.Singleton("UserService", struct {
+		name string
+	}{name: "hello"})
+
+	method := func(userService struct {name string}) string {return userService.name}
+	result := container.Call(method, []string{"UserService"}, []interface{}{nil})
+
+	if result[0] != "hello" {
+		t.Fatal("User name is incorrect")
+	}
+}
+
 func Benchmark_SingletonResolve(b *testing.B) {
+	container.Reset()
+
 	container.Singleton("UserService", struct {
 		name string
 	}{name: "hello"})
@@ -187,12 +215,14 @@ func Benchmark_SingletonResolve(b *testing.B) {
 	i := 0
 	for ; i <= b.N; i++ {
 		if container.Resolve("UserService").(struct{ name string }).name != "hello" {
-			log.Fatal("User name is incorrect")
+			b.Fatal("User name is incorrect")
 		}
 	}
 }
 
 func Benchmark_InstanceResolve(b *testing.B) {
+	container.Reset()
+
 	container.Instance("UserService", func() interface{} {
 		return struct {
 			name string
@@ -202,12 +232,14 @@ func Benchmark_InstanceResolve(b *testing.B) {
 	i := 0
 	for ; i <= b.N; i++ {
 		if container.Resolve("UserService").(struct{ name string }).name != "hello" {
-			log.Fatal("User name is incorrect")
+			b.Fatal("User name is incorrect")
 		}
 	}
 }
 
 func Benchmark_AliasSingletonResolve(b *testing.B) {
+	container.Reset()
+
 	container.Singleton("UserService", struct {
 		name string
 	}{name: "hello"})
@@ -216,12 +248,14 @@ func Benchmark_AliasSingletonResolve(b *testing.B) {
 	i := 0
 	for ; i <= b.N; i++ {
 		if container.Resolve("UserServ").(struct{ name string }).name != "hello" {
-			log.Fatal("User name is incorrect")
+			b.Fatal("User name is incorrect")
 		}
 	}
 }
 
 func Benchmark_AliasInstanceResolve(b *testing.B) {
+	container.Reset()
+
 	container.Instance("UserService", func() interface{} {
 		return struct {
 			name string
@@ -232,12 +266,14 @@ func Benchmark_AliasInstanceResolve(b *testing.B) {
 	i := 0
 	for ; i <= b.N; i++ {
 		if container.Resolve("UserServ").(struct{ name string }).name != "hello" {
-			log.Fatal("User name is incorrect")
+			b.Fatal("User name is incorrect")
 		}
 	}
 }
 
 func Benchmark_ResolveGroup(b *testing.B) {
+	container.Reset()
+
 	container.Singleton("UserService", struct {
 		name string
 	}{name: "new user"})
@@ -255,20 +291,22 @@ func Benchmark_ResolveGroup(b *testing.B) {
 		services := container.ResolveGroup([]string{"UserService", "GoodsService", "OrderService"})
 
 		if services[0].(struct{ name string }).name != "new user" {
-			log.Fatal("User name is incorrect")
+			b.Fatal("User name is incorrect")
 		}
 
 		if services[1].(struct{ name string }).name != "new goods" {
-			log.Fatal("Goods name is incorrect")
+			b.Fatal("Goods name is incorrect")
 		}
 
 		if services[2].(struct{ name string }).name != "new order" {
-			log.Fatal("Order name is incorrect")
+			b.Fatal("Order name is incorrect")
 		}
 	}
 }
 
 func Benchmark_TagResolve(b *testing.B) {
+	container.Reset()
+
 	container.Singleton("UserService", struct {
 		name string
 	}{name: "hello"})
@@ -283,7 +321,26 @@ func Benchmark_TagResolve(b *testing.B) {
 		if tagDemo.(*struct {
 			Name interface{} `dep:"UserService"`
 		}).Name.(struct{ name string }).name != "hello" {
-			log.Fatal("User name is incorrect")
+			b.Fatal("User name is incorrect")
+		}
+	}
+}
+
+func Benchmark_Call(b *testing.B) {
+	container.Reset()
+
+	container.Singleton("UserService", struct {
+		name string
+	}{name: "hello"})
+
+	method := func(userService struct{ name string }) string { return userService.name }
+
+	i := 0
+	for ; i <= b.N; i++ {
+		result := container.Call(method, []string{"UserService"}, []interface{}{nil})
+
+		if result[0] != "hello" {
+			b.Fatal("User name is incorrect")
 		}
 	}
 }

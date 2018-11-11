@@ -205,6 +205,20 @@ func Test_Call(t *testing.T)  {
 	}
 }
 
+func Test_CallSpec(t *testing.T)  {
+	container.Reset()
+
+	container.Singleton("UserService", struct {
+		name string
+	}{name: "hello"})
+
+	method := func(args ...interface{}) interface{} {return args[0].(struct{name string}).name}
+
+	if container.CallSpec(method, []string{"UserService"}, []interface{}{nil}) != "hello" {
+		t.Fatal("User name is incorrect")
+	}
+}
+
 func Benchmark_SingletonResolve(b *testing.B) {
 	container.Reset()
 
@@ -340,6 +354,23 @@ func Benchmark_Call(b *testing.B) {
 		result := container.Call(method, []string{"UserService"}, []interface{}{nil})
 
 		if result[0] != "hello" {
+			b.Fatal("User name is incorrect")
+		}
+	}
+}
+
+func Benchmark_CallSpec(b *testing.B) {
+	container.Reset()
+
+	container.Singleton("UserService", struct {
+		name string
+	}{name: "hello"})
+
+	method := func(args ...interface{}) interface{} { return args[0].(struct{name string}).name }
+
+	i := 0
+	for ; i <= b.N; i++ {
+		if container.CallSpec(method, []string{"UserService"}, []interface{}{nil}) != "hello" {
 			b.Fatal("User name is incorrect")
 		}
 	}

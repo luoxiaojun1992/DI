@@ -83,6 +83,7 @@ func (c *Container) Tag(name string, resource interface{}) {
 }
 
 // Call function with args with dependencies
+// Low performance
 func (c *Container) Call(method interface{}, argNames []string, argValues []interface{}) []interface{} {
 	reflectType := reflect.TypeOf(method)
 
@@ -106,6 +107,18 @@ func (c *Container) Call(method interface{}, argNames []string, argValues []inte
 	}
 
 	return results
+}
+
+// Call special function with args with dependencies
+// High performance
+func (c *Container) CallSpec(method func(args ...interface{}) interface{}, argNames []string, argValues []interface{}) interface{} {
+	for i, argValue := range argValues {
+		if argValue == nil {
+			argValues[i] = c.Resolve(argNames[i])
+		}
+	}
+
+	return method(argValues ...)
 }
 
 // Reset container

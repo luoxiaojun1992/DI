@@ -60,10 +60,19 @@ container.Singleton("OrderService", struct {
 	}{name: "new order"})
 container.ResolveGroup([]string{"UserService", "GoodsService", "OrderService"})
 
-//Call function with args with dependencies
+// Call function with args with dependencies
+// Low performance
 container.Singleton("UserService", struct {
 		name string
 	}{name: "hello"})
 method := func(userService struct {name string}) string {return userService.name}
 container.Call(method, []string{"UserService"}, []interface{}{nil})
+
+// Call special function with args with dependencies
+// High performance
+container.Singleton("UserService", struct {
+		name string
+	}{name: "hello"})
+method := func(args ...interface{}) interface{} {return args[0].(struct{name string}).name}
+container.CallSpec(method, []string{"UserService"}, []interface{}{nil})
 ```
